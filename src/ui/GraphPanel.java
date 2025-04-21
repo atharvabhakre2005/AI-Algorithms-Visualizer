@@ -12,6 +12,7 @@ public class GraphPanel extends JPanel {
     private final Map<String, Integer> heuristics;
     private final List<String> visitedNodes = new ArrayList<>();
     private final Set<String> visitedEdges = new HashSet<>();
+    private final Set<String> pathEdges = new HashSet<>();
 
     public GraphPanel(Map<String, Point> positions, Map<String, List<String>> graph, Map<String, Integer> heuristics) {
         this.nodePositions = positions;
@@ -31,11 +32,11 @@ public class GraphPanel extends JPanel {
             case "IDDFS" -> IDDFS.run(graph, start, goal, visitedNodes, this);
             default -> JOptionPane.showMessageDialog(null, "Invalid Algorithm!");
         }
-    
+
         markNodeVisited(goal);  
         repaint();
     }
-    
+
     public void markNodeVisited(String node) {
         if (!visitedNodes.contains(node)) {
             visitedNodes.add(node);
@@ -46,12 +47,19 @@ public class GraphPanel extends JPanel {
     public void clearGraph() {
         visitedNodes.clear();
         visitedEdges.clear();
+        pathEdges.clear();
         repaint();
     }
 
     public void markEdgeVisited(String from, String to) {
         String edge = from.compareTo(to) < 0 ? from + "-" + to : to + "-" + from;
         visitedEdges.add(edge);
+        repaint();
+    }
+
+    public void markEdgePath(String from, String to) {
+        String edge = from.compareTo(to) < 0 ? from + "-" + to : to + "-" + from;
+        pathEdges.add(edge);
         repaint();
     }
 
@@ -99,7 +107,15 @@ public class GraphPanel extends JPanel {
                 Point p2 = new Point(nodePositions.get(neighbor).x + xOffset, nodePositions.get(neighbor).y + yOffset);
 
                 String edge = node.compareTo(neighbor) < 0 ? node + "-" + neighbor : neighbor + "-" + node;
-                g2.setColor(visitedEdges.contains(edge) ? Color.RED : new Color(180, 180, 180, 150));
+
+                if (pathEdges.contains(edge)) {
+                    g2.setColor(Color.YELLOW); // Shortest path
+                } else if (visitedEdges.contains(edge)) {
+                    g2.setColor(Color.RED); // Explored edges
+                } else {
+                    g2.setColor(new Color(180, 180, 180, 150)); // Default
+                }
+
                 g2.drawLine(p1.x, p1.y, p2.x, p2.y);
             }
         }

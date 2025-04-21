@@ -42,7 +42,7 @@ public class AStar {
             }
 
             for (String neighbor : graph.getOrDefault(node, new ArrayList<>())) {
-                int tentativeGScore = gScore.get(node) + 1; // Assuming cost of 1, change if weighted
+                int tentativeGScore = gScore.get(node) + 1; // Assuming cost of 1
                 
                 if (tentativeGScore < gScore.get(neighbor)) {
                     parent.put(neighbor, node);
@@ -58,10 +58,22 @@ public class AStar {
     }
 
     private static void reconstructPath(Map<String, String> parent, String start, String goal, GraphPanel panel) {
+        List<String> path = new ArrayList<>();
         String current = goal;
+
         while (parent.containsKey(current) && !current.equals(start)) {
-            panel.markEdgeVisited(parent.get(current), current);
+            path.add(current);
             current = parent.get(current);
+        }
+
+        path.add(start);
+        Collections.reverse(path);
+
+        for (int i = 0; i < path.size() - 1; i++) {
+            String from = path.get(i);
+            String to = path.get(i + 1);
+            panel.markEdgePath(from, to);
+            panel.sleep();
         }
     }
 }
