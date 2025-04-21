@@ -7,18 +7,25 @@ public class DFS {
         dfs(graph, start, goal, new HashSet<>(), visitedNodes, panel);
     }
 
-    private static void dfs(Map<String, List<String>> graph, String node, String goal, Set<String> visited, List<String> visitedNodes, GraphPanel panel) {
+    private static boolean dfs(Map<String, List<String>> graph, String node, String goal, Set<String> visited, List<String> visitedNodes, GraphPanel panel) {
         visited.add(node);
         visitedNodes.add(node);
         panel.repaint();
         panel.sleep();
 
-        if (node.equals(goal)) return;
+        // ✅ Stop recursion if we reached the goal
+        if (node.equals(goal)) return true;
 
         for (String neighbor : graph.getOrDefault(node, new ArrayList<>())) {
             if (!visited.contains(neighbor)) {
-                dfs(graph, neighbor, goal, visited, visitedNodes, panel);
+                panel.markEdgeVisited(node, neighbor);  // ✅ Highlight edge
+
+                if (dfs(graph, neighbor, goal, visited, visitedNodes, panel)) {
+                    return true; // ✅ Stop further recursion if goal is found
+                }
             }
         }
+
+        return false; // ✅ Return false if the goal was not found
     }
 }

@@ -1,45 +1,58 @@
 package ui;
 
 import algorithms.*;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.awt.Point;
-import javax.swing.*;
+import java.util.*;
 import java.awt.*;
+import javax.swing.*;
+import java.util.List;
 
 public class GraphPanel extends JPanel {
     private final Map<String, Point> nodePositions;
     private final Map<String, List<String>> graph;
+    private final Map<String, Integer> heuristics;
     private final List<String> visitedNodes = new ArrayList<>();
-    private final List<String[]> visitedEdges = new ArrayList<>();
+    private final Set<String> visitedEdges = new HashSet<>();
 
-    public GraphPanel(Map<String, Point> positions, Map<String, List<String>> graph) {
+    public GraphPanel(Map<String, Point> positions, Map<String, List<String>> graph, Map<String, Integer> heuristics) {
         this.nodePositions = positions;
         this.graph = graph;
+        this.heuristics = heuristics;
     }
 
     public void search(String algorithm, String start, String goal) {
-        visitedNodes.clear();
-        visitedEdges.clear();
-
+        clearGraph();
+        
         switch (algorithm.toUpperCase()) {
             case "BFS" -> BFS.run(graph, start, goal, visitedNodes, this);
             case "DFS" -> DFS.run(graph, start, goal, visitedNodes, this);
-            case "A*" -> AStar.run(graph, nodePositions, start, goal, visitedNodes, this);
-            case "MINMAX" -> MinMax.run(graph, start, goal, visitedNodes, this);
-            case "ALPHABETA" -> AlphaBetaPruning.run(graph, start, goal, visitedNodes, this);
-            case "AO*" -> AOStar.run(graph, nodePositions, start, goal, visitedNodes, this);
-            case "DLS" -> DLS.run(graph, start, goal, visitedNodes, this, 3);
+            case "A*" -> AStar.run(graph, nodePositions, heuristics, start, goal, visitedNodes, this);
+            case "AO*" -> AOStar.run(graph, nodePositions, heuristics, start, goal, visitedNodes, this);
+            case "DLS" -> DLS.run(graph, start, goal, visitedNodes, this, 2);
             case "IDDFS" -> IDDFS.run(graph, start, goal, visitedNodes, this);
             default -> JOptionPane.showMessageDialog(null, "Invalid Algorithm!");
         }
-
+    
+        // 🟢 Highlight Goal Node After Search
+        markNodeVisited(goal);  
+    
+        repaint();
+    }
+    
+    public void markNodeVisited(String node) {
+        if (!visitedNodes.contains(node)) {
+            visitedNodes.add(node);
+            repaint();
+        }
+    }
+    public void clearGraph() {
+        visitedNodes.clear();
+        visitedEdges.clear();
         repaint();
     }
 
     public void markEdgeVisited(String from, String to) {
-        visitedEdges.add(new String[]{from, to});
+        String edge = from.compareTo(to) < 0 ? from + "-" + to : to + "-" + from;
+        visitedEdges.add(edge);
         repaint();
     }
 
@@ -55,40 +68,71 @@ public class GraphPanel extends JPanel {
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        g2.setFont(new Font("Arial", Font.BOLD, 24));
-        g2.drawString("AI Algorithms Visualizer", getWidth() / 2 - 120, 30);
+        // 🌟 Gradient Background
+        GradientPaint gradient = new GradientPaint(0, 0, new Color(60, 63, 65), getWidth(), getHeight(), new Color(25, 25, 112));
+        g2.setPaint(gradient);
+        g2.fillRect(0, 0, getWidth(), getHeight());
 
-        g2.setStroke(new BasicStroke(2));
+        // Calculate Graph Centering Offsets
+        int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE;
+        int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE;
 
+        for (Point p : nodePositions.values()) {
+            minX = Math.min(minX, p.x);
+            minY = Math.min(minY, p.y);
+            maxX = Math.max(maxX, p.x);
+            maxY = Math.max(maxY, p.y);
+        }
+
+        int graphWidth = maxX - minX;
+        int graphHeight = maxY - minY;
+
+        int xOffset = (getWidth() - graphWidth) / 2 - minX;
+        int yOffset = (getHeight() - graphHeight) / 2 - minY;
+
+        // 🏷️ Title
+        g2.setColor(Color.WHITE);
+        g2.setFont(new Font("Arial", Font.BOLD, 26));
+        g2.drawString("AI Algorithms Visualizer", getWidth() / 2 - 130, 40);
+
+        g2.setStroke(new BasicStroke(3));
+
+        // 🔹 Draw Edges
         for (String node : graph.keySet()) {
             for (String neighbor : graph.get(node)) {
-                Point p1 = nodePositions.get(node);
-                Point p2 = nodePositions.get(neighbor);
+                Point p1 = new Point(nodePositions.get(node).x + xOffset, nodePositions.get(node).y + yOffset);
+                Point p2 = new Point(nodePositions.get(neighbor).x + xOffset, nodePositions.get(neighbor).y + yOffset);
 
-                g2.setColor(visitedEdges.contains(new String[]{node, neighbor}) ? Color.RED : Color.LIGHT_GRAY);
+                String edge = node.compareTo(neighbor) < 0 ? node + "-" + neighbor : neighbor + "-" + node;
+                g2.setColor(visitedEdges.contains(edge) ? Color.RED : new Color(180, 180, 180, 150));
                 g2.drawLine(p1.x, p1.y, p2.x, p2.y);
             }
         }
 
-        for (int i = 0; i < nodePositions.keySet().size(); i++) {
-            String node = (String) nodePositions.keySet().toArray()[i];
-            Point p = nodePositions.get(node);
-            
-            // Color nodes based on visit status
-            g2.setColor(visitedNodes.contains(node) ? Color.GREEN : Color.GRAY);
+        // 🔹 Draw Nodes
+        for (String node : nodePositions.keySet()) {
+            Point p = new Point(nodePositions.get(node).x + xOffset, nodePositions.get(node).y + yOffset);
+
+            g2.setColor(visitedNodes.contains(node) ? new Color(50, 205, 50) : new Color(100, 100, 100));
             g2.fillOval(p.x - 20, p.y - 20, 40, 40);
 
-            // Draw node name
-            g2.setColor(Color.BLACK);
-            g2.setFont(new Font("Arial", Font.BOLD, 14));
+            g2.setColor(Color.WHITE);
+            g2.setFont(new Font("Arial", Font.BOLD, 16));
             g2.drawString(node, p.x - 7, p.y + 5);
 
-            // Draw visit order number
+            // 🔹 Visit Order
             if (visitedNodes.contains(node)) {
                 int visitOrder = visitedNodes.indexOf(node) + 1;
                 g2.setColor(Color.RED);
                 g2.setFont(new Font("Arial", Font.BOLD, 12));
                 g2.drawString(String.valueOf(visitOrder), p.x - 20, p.y - 25);
+            }
+
+            // 🔹 Display Heuristics
+            if (heuristics.containsKey(node)) {
+                g2.setColor(Color.CYAN);
+                g2.setFont(new Font("Arial", Font.BOLD, 12));
+                g2.drawString("h=" + heuristics.get(node), p.x + 25, p.y);
             }
         }
     }
