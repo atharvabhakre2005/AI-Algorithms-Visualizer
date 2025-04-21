@@ -32,9 +32,7 @@ public class GraphPanel extends JPanel {
             default -> JOptionPane.showMessageDialog(null, "Invalid Algorithm!");
         }
     
-        // 🟢 Highlight Goal Node After Search
         markNodeVisited(goal);  
-    
         repaint();
     }
     
@@ -44,6 +42,7 @@ public class GraphPanel extends JPanel {
             repaint();
         }
     }
+
     public void clearGraph() {
         visitedNodes.clear();
         visitedEdges.clear();
@@ -68,12 +67,10 @@ public class GraphPanel extends JPanel {
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // 🌟 Gradient Background
         GradientPaint gradient = new GradientPaint(0, 0, new Color(60, 63, 65), getWidth(), getHeight(), new Color(25, 25, 112));
         g2.setPaint(gradient);
         g2.fillRect(0, 0, getWidth(), getHeight());
 
-        // Calculate Graph Centering Offsets
         int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE;
         int maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE;
 
@@ -90,14 +87,12 @@ public class GraphPanel extends JPanel {
         int xOffset = (getWidth() - graphWidth) / 2 - minX;
         int yOffset = (getHeight() - graphHeight) / 2 - minY;
 
-        // 🏷️ Title
         g2.setColor(Color.WHITE);
         g2.setFont(new Font("Arial", Font.BOLD, 26));
         g2.drawString("AI Algorithms Visualizer", getWidth() / 2 - 130, 40);
 
         g2.setStroke(new BasicStroke(3));
 
-        // 🔹 Draw Edges
         for (String node : graph.keySet()) {
             for (String neighbor : graph.get(node)) {
                 Point p1 = new Point(nodePositions.get(node).x + xOffset, nodePositions.get(node).y + yOffset);
@@ -109,7 +104,6 @@ public class GraphPanel extends JPanel {
             }
         }
 
-        // 🔹 Draw Nodes
         for (String node : nodePositions.keySet()) {
             Point p = new Point(nodePositions.get(node).x + xOffset, nodePositions.get(node).y + yOffset);
 
@@ -120,7 +114,6 @@ public class GraphPanel extends JPanel {
             g2.setFont(new Font("Arial", Font.BOLD, 16));
             g2.drawString(node, p.x - 7, p.y + 5);
 
-            // 🔹 Visit Order
             if (visitedNodes.contains(node)) {
                 int visitOrder = visitedNodes.indexOf(node) + 1;
                 g2.setColor(Color.RED);
@@ -128,7 +121,6 @@ public class GraphPanel extends JPanel {
                 g2.drawString(String.valueOf(visitOrder), p.x - 20, p.y - 25);
             }
 
-            // 🔹 Display Heuristics
             if (heuristics.containsKey(node)) {
                 g2.setColor(Color.CYAN);
                 g2.setFont(new Font("Arial", Font.BOLD, 12));

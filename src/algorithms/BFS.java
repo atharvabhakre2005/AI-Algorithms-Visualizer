@@ -8,7 +8,7 @@ public class BFS {
         Set<String> visited = new HashSet<>();
 
         queue.add(start);
-        visited.add(start);  // ✅ Mark start as visited immediately
+        visited.add(start); // Mark start as visited
 
         while (!queue.isEmpty()) {
             String node = queue.poll();
@@ -16,14 +16,14 @@ public class BFS {
             panel.repaint();
             panel.sleep();
 
-            // ✅ Stop BFS if we found the goal
+            // Stop BFS if the goal is found
             if (node.equals(goal)) return;
 
             for (String neighbor : graph.getOrDefault(node, new ArrayList<>())) {
                 if (!visited.contains(neighbor)) {
-                    visited.add(neighbor);  // ✅ Mark visited before adding to queue
+                    visited.add(neighbor); // Mark visited before adding to queue
                     queue.add(neighbor);
-                    panel.markEdgeVisited(node, neighbor);  // ✅ Highlight edges
+                    panel.markEdgeVisited(node, neighbor); // Highlight edges
                 }
             }
         }

@@ -13,19 +13,19 @@ public class DFS {
         panel.repaint();
         panel.sleep();
 
-        // ✅ Stop recursion if we reached the goal
+        // Stop recursion if we reached the goal
         if (node.equals(goal)) return true;
 
         for (String neighbor : graph.getOrDefault(node, new ArrayList<>())) {
             if (!visited.contains(neighbor)) {
-                panel.markEdgeVisited(node, neighbor);  // ✅ Highlight edge
+                panel.markEdgeVisited(node, neighbor); // Highlight edge
 
                 if (dfs(graph, neighbor, goal, visited, visitedNodes, panel)) {
-                    return true; // ✅ Stop further recursion if goal is found
+                    return true; // Stop further recursion if goal is found
                 }
             }
         }
 
-        return false; // ✅ Return false if the goal was not found
+        return false; // Return false if the goal was not found
     }
 }

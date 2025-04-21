@@ -83,7 +83,7 @@ public class Main {
         frame.add(panel, BorderLayout.CENTER);
         frame.setVisible(true);
 
-        // 🔁 Loop for multiple visualizations
+        // Loop for multiple visualizations
         while (true) {
             String[] algorithms = {"BFS", "DFS", "A*", "AO*", "DLS", "IDDFS", "Exit"};
             String algorithm = (String) JOptionPane.showInputDialog(
@@ -101,7 +101,7 @@ public class Main {
                 System.exit(0);
             }
 
-            // 🌟 Ask for Start and Goal nodes
+            // Ask for Start and Goal nodes
             String start = JOptionPane.showInputDialog(frame, "Enter START node (e.g., A):");
             if (start == null || !graph.containsKey(start)) {
                 JOptionPane.showMessageDialog(frame, "Invalid start node!");
