@@ -1,0 +1,2 @@
+javac -d . main/Main.java ui/GraphPanel.java algorithms/*.java  
+java main.Main
